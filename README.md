@@ -5,8 +5,8 @@
 **AI 实时字幕 / 翻译系统**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![.NET](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
-[![MAUI](https://img.shields.io/badge/MAUI-Cross%20Platform-blue.svg)](https://learn.microsoft.com/en-us/dotnet/maui/)
+[![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
+[![MAUI](https://img.shields.io/badge/MAUI-10.0-blue.svg)](https://learn.microsoft.com/en-us/dotnet/maui/whats-new/dotnet-10?view=net-maui-10.0)
 
 [English](#) | [中文](#)
 
@@ -25,41 +25,39 @@ PrismaAI 是一个跨平台的 AI 实时字幕和翻译应用程序，支持离�
 - **离线优先**: 本地模型，无需网络
 - **云端加速**: 支持云端 API (OpenAI / Groq / DeepSeek)
 - **量化模型**: 支持 GGUF / ONNX 格式
+- **.NET 10 LTS**: 使用最新的 .NET 长期支持版本
 
 ## 技术栈
 
-| 功能 | 技术 |
-|------|------|
-| UI 框架 | .NET MAUI |
-| ASR 模型 | Whisper (GGUF/ONNX) |
-| 翻译模型 | NLLB-200 / SeamlessM4T |
-| TTS 模型 | VITS2 / Coqui TTS |
-| 推理引擎 | ONNX Runtime / llama.cpp |
-| 云端 API | OpenAI / Groq 兼容接口 |
+| 功能 | 技术 | 版本 |
+|------|------|------|
+| UI 框架 | .NET MAUI | 10.0 |
+| C# 语言 | C# 14 | preview |
+| ASR 模型 | Whisper (GGUF/ONNX) | Large V3 Turbo |
+| 翻译模型 | NLLB-200 / SeamlessM4T | - |
+| TTS 模型 | VITS2 / Coqui TTS | - |
+| 推理引擎 | ONNX Runtime / llama.cpp | 1.21 |
+| 云端 API | OpenAI / Groq 兼容 | - |
 
 ## 架构
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      PrismaAI UI                        │
-│              (MAUI - Cross Platform)                    │
-└────────────────────┬────────────────────────────────────┘
-                     │
-┌────────────────────▼────────────────────────────────────┐
-│                  PrismaAI Core                          │
-│  ┌──────────┐  ┌─────────────┐  ┌─────────────────┐   │
-│  │  Audio   │  │ Inference   │  │    Pipeline     │   │
-│  │  Capture │─▶│   Engine    │─▶│    Processor    │   │
-│  └──────────┘  └─────────────┘  └─────────────────┘   │
-└────────────────────┬────────────────────────────────────┘
-                     │
-        ┌────────────┼────────────┐
-        │            │            │
-   ┌────▼────┐  ┌───▼────┐  ┌───▼─────┐
-   │  Local  │  │  GGUF  │  │  Cloud  │
-   │  ONNX   │  │llama.cpp│  │   API   │
-   └─────────┘  └────────┘  └─────────┘
-```
+### 分层设计
+
+1. **UI 层** (PrismaAI.UI)
+   - MAUI 跨平台界面
+   - MVVM 架构模式
+   - 响应式数据绑定
+
+2. **核心层** (PrismaAI.Core)
+   - 音频捕获模块
+   - AI 推理引擎
+   - 处理流水线
+   - 云端 API 客户端
+
+3. **推理层**
+   - 本地 ONNX Runtime
+   - GGUF (llama.cpp)
+   - 云端 API 调用
 
 ## 模型支持
 
@@ -89,14 +87,14 @@ PrismaAI 是一个跨平台的 AI 实时字幕和翻译应用程序，支持离�
 
 ### 前置要求
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (LTS, 支持到 2028年11月)
 - [MAUI Workload](https://learn.microsoft.com/en-us/dotnet/maui/get-started/installation)
 
 ### 安装
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-username/PrismaAI.git
+git clone https://github.com/Excurs1ons/PrismaAI.git
 cd PrismaAI
 
 # 安装 MAUI 工作负载
@@ -113,16 +111,19 @@ dotnet run
 
 ```bash
 # Android
-dotnet build -f net8.0-android
+dotnet build -f net10.0-android
 
 # iOS
-dotnet build -f net8.0-ios
+dotnet build -f net10.0-ios
 
 # Windows
-dotnet build -f net8.0-windows10.0.19041.0
+dotnet build -f net10.0-windows10.0.26100
 
-# macOS
-dotnet build -f net8.0-maccatalyst
+# macOS (MacCatalyst)
+dotnet build -f net10.0-maccatalyst
+
+# Linux (.NET 10 MAUI 新增支持)
+dotnet build -f net10.0-linux
 ```
 
 ## 云端 API 配置
