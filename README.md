@@ -440,3 +440,78 @@ dotnet build -f net9.0-android
 ---
 
 *"A journey of a thousand commits begins with a single `dotnet build`"* 🎯
+
+---
+
+### 第二轮尝试：.NET 9 + GC 限制
+
+虽然第一轮以失败告终，但我们没有放弃！
+
+#### 新的策略
+
+```bash
+# 降级到 .NET 9
+$ proot-distro login ubuntu
+$ apt-get update && apt-get install -y dotnet-sdk-9.0
+
+$ dotnet --version
+9.0.112  ✅
+
+# 设置 GC 堆限制（关键！）
+export DOTNET_GCHeapHardLimit=0x10000000  # 256 MB
+export DOTNET_GCHeapCount=1
+
+# 尝试编译 Core 项目
+$ dotnet build src/PrismaAI.Core/PrismaAI.Core.csproj
+
+Build succeeded.    ✅
+
+    3 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.35
+```
+
+#### Core 项目编译成功！
+
+通过设置 `DOTNET_GCHeapHardLimit=0x10000000`，我们成功绕过了 proot 环境的内存限制！
+
+但 Android APK 仍然无法编译：
+
+```bash
+$ dotnet build src/PrismaAI.UI/PrismaAI.UI.csproj -f net9.0-android
+
+error NETSDK1147: To build this project, the following workloads must be installed: wasi-experimental
+
+$ dotnet workload restore
+No workloads installed for this feature band.
+Installing workloads: wasi-experimental  # (不是 MAUI!)
+Successfully installed workload(s): wasi-experimental.
+
+$ dotnet workload search android
+# (空结果)
+
+$ dotnet workload search maui
+# (空结果)
+```
+
+#### 最终结论
+
+- **.NET 9 SDK**: 可在 ARM64/proot 环境正常运行
+- **Core 项目编译**: 通过 GCHeapHardLimit 限制解决内存问题，编译成功
+- **MAUI Workload**: ARM64 Linux 平台无此 workload
+- **Android APK 编译**: 在 Termux/proot 环境下不可行
+
+**成功**:
+- Core 项目在 ARM64/proot 环境编译成功
+- 通过 GC 堆限制解决 256GiB 分配失败问题
+- 使用 .NET 9 替代 .NET 10
+
+**不可行**:
+- MAUI workload 在 ARM64 Linux 上不存在
+- Android SDK 需要原生环境
+- APK 编译必须在 x64 PC 或 CI/CD 上进行
+
+---
+
+*"Success is not final, failure is not fatal: it is the courage to continue that counts."* 💪
