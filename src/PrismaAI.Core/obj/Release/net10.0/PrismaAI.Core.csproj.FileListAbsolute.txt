@@ -1,0 +1,6 @@
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.csproj.AssemblyReference.cache
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.GeneratedMSBuildEditorConfig.editorconfig
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.AssemblyInfoInputs.cache
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.AssemblyInfo.cs
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.csproj.CoreCompileInputs.cache
+/storage/self/primary/.repos/PrismaAI/src/PrismaAI.Core/obj/Release/net10.0/PrismaAI.Core.sourcelink.json

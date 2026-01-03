@@ -183,3 +183,85 @@ PrismaAI/
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=your-username/PrismaAI&type=Date)](https://star-history.com/#your-username/PrismaAI&Date)
+
+---
+
+## <img src="https://img.icons8.com/emoji/48/000000/easter-egg.png" width="24"/> 彩蛋
+
+### 在 Android 手机上直接编译 APK 的冒险之旅
+
+有一天，我们在 Termux (Android) 上突发奇想：**能不能在手机上直接编译这个 Android APK？**
+
+于是开始了这段旅程...
+
+#### 第一步：环境准备
+
+```bash
+# 系统信息
+$ uname -m
+aarch64  # ARM64 架构
+
+$ java -version
+openjdk version "21.0.9"  # Java 已就绪 ✅
+```
+
+#### 第二步：安装 Ubuntu
+
+```bash
+$ proot-distro install ubuntu
+[*] Installing Ubuntu (25.10)...
+[*] Downloading rootfs archive...
+# 下载 56MB 的 Ubuntu rootfs...
+[100%] ========================================
+[*] Finished. ✅
+```
+
+#### 第三步：安装 .NET 10
+
+```bash
+$ apt-get install dotnet-sdk-10.0
+$ dotnet --version
+10.0.100 ✅
+```
+
+#### 第四步：安装 MAUI Workload
+
+```bash
+$ dotnet workload install maui
+Workload installation failed: Workload ID maui is not recognized.
+
+$ dotnet workload search
+# 可用列表：
+# wasm-tools, wasm-experimental...
+# 没有 maui？没有 android？
+```
+
+#### 第五步：尝试编译
+
+```bash
+$ dotnet build src/PrismaAI.Core/PrismaAI.Core.csproj
+error : GC: Reserving 274877906944 bytes (256 GiB) for the regions range failed
+error : GC heap initialization failed with error 0x8007000E
+error : Failed to create CoreCLR, HRESULT: 0x8007000E
+```
+
+#### 结论
+
+在 Android/Termux/proot 环境中编译 .NET MAUI APK 的困难：
+
+| 问题 | 状态 |
+|------|------|
+| 安装 Ubuntu | ✅ 成功 |
+| 安装 .NET 10 SDK | ✅ 成功 |
+| MAUI Workload 可用性 | ❌ 不支持 ARM64/proot |
+| 内存限制 (GC 256GiB) | ❌ proot 虚拟内存限制 |
+
+**教训**：有些事还是得在 PC 上做...或者使用 GitHub Actions 😄
+
+```bash
+# 推荐方式：在 PC 上构建
+dotnet workload install maui
+dotnet build -f net10.0-android
+
+# 或使用 GitHub Actions 自动构建
+```
