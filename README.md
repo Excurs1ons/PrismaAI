@@ -5,8 +5,8 @@
 **AI 实时字幕 / 翻译系统**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
-[![MAUI](https://img.shields.io/badge/MAUI-10.0-blue.svg)](https://learn.microsoft.com/en-us/dotnet/maui/whats-new/dotnet-10?view=net-maui-10.0)
+[![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/download/dotnet/9.0)
+[![MAUI](https://img.shields.io/badge/MAUI-9.0-blue.svg)](https://learn.microsoft.com/en-us/dotnet/maui/whats-new/dotnet-9?view=net-maui-9.0)
 
 [English](#) | [中文](#)
 
@@ -25,18 +25,18 @@ PrismaAI 是一个跨平台的 AI 实时字幕和翻译应用程序，支持离�
 - **离线优先**: 本地模型，无需网络
 - **云端加速**: 支持云端 API (OpenAI / Groq / DeepSeek)
 - **量化模型**: 支持 GGUF / ONNX 格式
-- **.NET 10 LTS**: 使用最新的 .NET 长期支持版本
+- **.NET 9**: 使用稳定的 .NET 9 版本
 
 ## 技术栈
 
 | 功能 | 技术 | 版本 |
 |------|------|------|
-| UI 框架 | .NET MAUI | 10.0 |
-| C# 语言 | C# 14 | preview |
+| UI 框架 | .NET MAUI | 9.0 |
+| C# 语言 | C# 13 | preview |
 | ASR 模型 | Whisper (GGUF/ONNX) | Large V3 Turbo |
 | 翻译模型 | NLLB-200 / SeamlessM4T | - |
 | TTS 模型 | VITS2 / Coqui TTS | - |
-| 推理引擎 | ONNX Runtime / llama.cpp | 1.21 |
+| 推理引擎 | ONNX Runtime / llama.cpp | 1.20 |
 | 云端 API | OpenAI / Groq 兼容 | - |
 
 ## 架构
@@ -87,7 +87,7 @@ PrismaAI 是一个跨平台的 AI 实时字幕和翻译应用程序，支持离�
 
 ### 前置要求
 
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (LTS, 支持到 2028年11月)
+- [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [MAUI Workload](https://learn.microsoft.com/en-us/dotnet/maui/get-started/installation)
 
 ### 安装
@@ -111,19 +111,16 @@ dotnet run
 
 ```bash
 # Android
-dotnet build -f net10.0-android
+dotnet build -f net9.0-android
 
 # iOS
-dotnet build -f net10.0-ios
+dotnet build -f net9.0-ios
 
 # Windows
-dotnet build -f net10.0-windows10.0.26100
+dotnet build -f net9.0-windows10.0.19041.0
 
 # macOS (MacCatalyst)
-dotnet build -f net10.0-maccatalyst
-
-# Linux (.NET 10 MAUI 新增支持)
-dotnet build -f net10.0-linux
+dotnet build -f net9.0-maccatalyst
 ```
 
 ## 云端 API 配置
@@ -231,20 +228,23 @@ URL: https://github.com/termux/proot-distro/releases/download/v4.30.1/ubuntu-que
 # （这是正常的，因为我们是纯 64 位 ARM）
 ```
 
-#### 第三步：安装 .NET 10 SDK
+#### 第三步：安装 .NET SDK
 
 ```bash
 $ proot-distro login ubuntu
 $ apt-get update && apt-get install -y dotnet-sdk-10.0
 
 Welcome to .NET 10.0!
----------------------
 SDK Version: 10.0.100
----------------------
 
 $ dotnet --version
 10.0.100  ✅
+
+# 等等，MAUI 不支持 .NET 10？！
 ```
+
+> 💡 **重要发现**: .NET 10 于 2025年11月发布，但 MAUI workload 尚未完全支持。
+> .NET 9 (2024年11月发布) 才是目前 MAUI 的最佳选择！
 
 #### 第四步：尝试安装 MAUI Workload
 
@@ -414,8 +414,9 @@ GC: Reserving 274877906944 bytes (256 GiB) failed  # ❌ 内存限制
 
 ```bash
 # 方案 A: 在 PC 上构建 (推荐)
+# 使用 .NET 9 + MAUI 9
 dotnet workload install maui
-dotnet build -f net10.0-android
+dotnet build -f net9.0-android
 
 # 方案 B: 使用 GitHub Actions (自动化)
 # 在 .github/workflows/build-android.yml 中配置自动构建
@@ -423,6 +424,18 @@ dotnet build -f net10.0-android
 # 方案 C: 使用 GitHub Codespaces (云端开发)
 # 直接在浏览器中使用完整开发环境
 ```
+
+---
+
+**版本选择经验**:
+
+| .NET 版本 | 发布时间 | MAUI 支持 | 推荐使用 |
+|-----------|----------|-----------|----------|
+| .NET 8 | 2023年11月 | ✅ 完全支持 | ✅ 稳定生产 |
+| .NET 9 | 2024年11月 | ✅ 完全支持 | ✅ 推荐使用 |
+| .NET 10 | 2025年11月 | ⚠️ 部分支持 | ⏳ 等待更新 |
+
+> 💡 **经验教训**: 对于 MAUI 项目，建议使用 .NET 9 (当前稳定) 而非 .NET 10 (太新)
 
 ---
 
