@@ -60,8 +60,8 @@ public enum InferenceEngineType
 /// </summary>
 public record ModelConfig
 {
-    public required string ModelName { get; init; }
-    public required InferenceEngineType EngineType { get; init; }
+    public string ModelName { get; init; } = "";
+    public InferenceEngineType EngineType { get; init; } = InferenceEngineType.LocalOnnx;
     public string? ModelPath { get; init; }
     public string? CloudEndpoint { get; init; }
     public string? ApiKey { get; init; }

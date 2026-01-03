@@ -18,7 +18,7 @@ public interface ICloudInferenceService
     /// <summary>语音合成</summary>
     Task<SynthesisResult> SynthesizeAsync(string text, string voice = "default", CancellationToken ct = default);
 
-    /// <summary>流式语音识别 (Server-Sent Events)</summary>
+    /// <summary>流式语音识别</summary>
     IAsyncEnumerable<TranscriptionResult> StreamTranscribeAsync(IAsyncEnumerable<byte[]> audioStream, string language = "auto", CancellationToken ct = default);
 }
 
@@ -29,61 +29,15 @@ public interface IOpenAIAudioApi
 {
     [Multipart]
     [Post("/v1/audio/transcriptions")]
-    Task<AudioResponse> CreateTranscription([Request] AudioTranscriptionRequest request);
-
-    [Multipart]
-    [Post("/v1/audio/translations")]
-    Task<AudioResponse> CreateTranslation([Request] AudioTranslationRequest request);
+    Task<AudioResponse> CreateTranscription([AliasAs("file")] StreamPart file, [AliasAs("model")] string model, [AliasAs("language")] string? language = null);
 
     [Post("/v1/audio/speech")]
-    Task<IApiResponse<byte[]>> CreateSpeech([Body] SpeechRequest request);
+    Task<byte[]> CreateSpeech([Body] SpeechRequest request);
 }
 
 /// <summary>
-/// OpenAI 兼容 API 请求/响应模型
+/// API 请求/响应模型
 /// </summary>
-public record AudioTranscriptionRequest
-{
-    [AliasAs("file")]
-    public required StreamPart File { get; init; }
-
-    [AliasAs("model")]
-    public required string Model { get; init; }
-
-    [AliasAs("language")]
-    public string? Language { get; init; }
-
-    [AliasAs("prompt")]
-    public string? Prompt { get; init; }
-
-    [AliasAs("response_format")]
-    public string ResponseFormat { get; init; } = "json";
-
-    [AliasAs("temperature")]
-    public float? Temperature { get; init; }
-
-    [AliasAs("timestamp_granularities")]
-    public string[]? TimestampGranularities { get; init; }
-}
-
-public record AudioTranslationRequest
-{
-    [AliasAs("file")]
-    public required StreamPart File { get; init; }
-
-    [AliasAs("model")]
-    public required string Model { get; init; }
-
-    [AliasAs("prompt")]
-    public string? Prompt { get; init; }
-
-    [AliasAs("response_format")]
-    public string ResponseFormat { get; init; } = "json";
-
-    [AliasAs("temperature")]
-    public float? Temperature { get; init; }
-}
-
 public record SpeechRequest
 {
     [JsonPropertyName("model")]
@@ -139,60 +93,25 @@ public record SegmentInfo(
 );
 
 /// <summary>
-/// Groq API 接口 (超快推理)
-/// </summary>
-public interface IGroqApi
-{
-    [Post("/v1/audio/transcriptions")]
-    Task<AudioResponse> TranscribeAsync([Request] AudioTranscriptionRequest request);
-}
-
-/// <summary>
-/// DeepSeek API 接口
-/// </summary>
-public interface IDeepSeekApi
-{
-    [Post("/v1/audio/transcriptions")]
-    Task<AudioResponse> TranscribeAsync([Request] AudioTranscriptionRequest request);
-}
-
-/// <summary>
 /// 云端推理服务实现
 /// </summary>
 public class CloudInferenceService : ICloudInferenceService
 {
     private readonly IOpenAIAudioApi _openAIApi;
-    private readonly IGroqApi? _groqApi;
     private readonly string _defaultModel;
-    private readonly ILogger _logger;
 
-    public CloudInferenceService(
-        IOpenAIAudioApi openAIApi,
-        string defaultModel = "whisper-1")
+    public CloudInferenceService(IOpenAIAudioApi openAIApi, string defaultModel = "whisper-1")
     {
         _openAIApi = openAIApi;
         _defaultModel = defaultModel;
-        _logger = new NoOpLogger();
-    }
-
-    public CloudInferenceService WithGroq(IGroqApi groqApi)
-    {
-        return new CloudInferenceService(_openAIApi, _defaultModel) { _groqApi = groqApi };
     }
 
     public async Task<TranscriptionResult> TranscribeAsync(byte[] audioData, string language = "auto", CancellationToken ct = default)
     {
         using var audioStream = new MemoryStream(audioData);
-        var request = new AudioTranscriptionRequest
-        {
-            File = new StreamPart(audioStream, "audio.wav", "audio/wav"),
-            Model = _defaultModel,
-            Language = language == "auto" ? null : language,
-            Temperature = 0.0f,
-            TimestampGranularities = new[] { "word" }
-        };
+        var file = new StreamPart(audioStream, "audio.wav", "audio/wav");
 
-        var response = await _openAIApi.CreateTranscription(request);
+        var response = await _openAIApi.CreateTranscription(file, _defaultModel, language == "auto" ? null : language);
 
         var words = response.Words?.Select(w => new WordTimestamp(
             w.Word,
@@ -215,12 +134,12 @@ public class CloudInferenceService : ICloudInferenceService
 
     public async Task<TranslationResult> TranslateAsync(string text, string targetLanguage, string sourceLanguage = "auto", CancellationToken ct = default)
     {
-        // 这里使用 OpenAI 的 Chat API 进行翻译
-        // 也可以使用专门的翻译 API
+        // TODO: 实现实际的翻译 API 调用
+        await Task.CompletedTask;
         return new TranslationResult
         {
             SourceText = text,
-            TranslatedText = text, // 实际实现需要调用 API
+            TranslatedText = text,
             SourceLanguage = sourceLanguage,
             TargetLanguage = targetLanguage,
             Confidence = 1.0f
@@ -243,15 +162,14 @@ public class CloudInferenceService : ICloudInferenceService
             Speed = 1.0f
         };
 
-        var response = await _openAIApi.CreateSpeech(request);
-        var audioData = await response.GetContentAsByteArrayAsync(ct);
+        var audioData = await _openAIApi.CreateSpeech(request);
 
         return new SynthesisResult
         {
             AudioData = audioData,
             Format = "mp3",
             SampleRate = 24000,
-            Duration = TimeSpan.Zero // 可以从文件头解析
+            Duration = TimeSpan.Zero
         };
     }
 
@@ -260,7 +178,6 @@ public class CloudInferenceService : ICloudInferenceService
         string language = "auto",
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
     {
-        // 实现流式识别 (需要服务端支持 WebSocket 或 SSE)
         await foreach (var chunk in audioStream.WithCancellation(ct))
         {
             var result = await TranscribeAsync(chunk, language, ct);
@@ -273,18 +190,4 @@ public class CloudInferenceService : ICloudInferenceService
         if (words == null || words.Count == 0) return 1.0f;
         return words.Average(w => w.Probability);
     }
-}
-
-internal class NoOpLogger : ILogger
-{
-    public void Log(string message) { }
-    public void LogError(string error) { }
-    public void LogWarning(string warning) { }
-}
-
-internal interface ILogger
-{
-    void Log(string message);
-    void LogError(string error);
-    void LogWarning(string warning);
 }

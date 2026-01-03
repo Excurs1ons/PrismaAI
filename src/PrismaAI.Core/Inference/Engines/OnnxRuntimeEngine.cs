@@ -17,7 +17,8 @@ public abstract class OnnxRuntimeEngine : IInferenceEngine
     public virtual InferenceEngineType EngineType => InferenceEngineType.LocalOnnx;
     public virtual bool SupportsGPU => true;
     public virtual bool IsUsingGPU { get; protected set; }
-    public virtual bool IsModelLoaded => _session != null && _session is notDisposed;
+
+    public virtual bool IsModelLoaded => _session != null;
 
     /// <summary>创建会话选项</summary>
     protected virtual SessionOptions CreateSessionOptions(bool useGPU, int numThreads = -1)
@@ -26,7 +27,6 @@ public abstract class OnnxRuntimeEngine : IInferenceEngine
 
         if (useGPU)
         {
-            // 尝试使用 CUDA
             try
             {
                 options.AppendExecutionProvider_CUDA(0);
@@ -34,7 +34,6 @@ public abstract class OnnxRuntimeEngine : IInferenceEngine
             }
             catch
             {
-                // 回退到 CPU
                 IsUsingGPU = false;
             }
         }
@@ -85,7 +84,7 @@ public class OnnxWhisperModel : OnnxRuntimeEngine, IWhisperModel
     private const int MelBins = 80;
     private const int SampleRate = 16000;
     private const int HopLength = 160;
-    private const int ChunkLength = 30; // seconds
+    private const int ChunkLength = 30;
 
     private static readonly string[] s_tokens = InitializeTokens();
 
@@ -97,8 +96,6 @@ public class OnnxWhisperModel : OnnxRuntimeEngine, IWhisperModel
     public override async Task LoadModelAsync(string modelPath, CancellationToken ct = default)
     {
         await base.LoadModelAsync(modelPath, ct);
-
-        // 验证模型输入输出
         ValidateModel();
     }
 
@@ -113,27 +110,15 @@ public class OnnxWhisperModel : OnnxRuntimeEngine, IWhisperModel
 
         var sw = Stopwatch.StartNew();
 
-        // 1. 预处理音频
-        var melSpectrogram = ComputeMelSpectrogram(audioSamples, sampleRate);
-
-        // 2. 准备输入
-        var inputs = new List<NamedOnnxValue>
-        {
-            NamedOnnxValue.CreateTensorFromEnumerable("mel", melSpectrogram, new[] { 1, MelBins, melSpectrogram.Length / MelBins })
-        };
-
-        // 3. 运行推理
-        using var results = _session!.Run(inputs);
-
-        // 4. 解码结果
-        var output = results.First().AsEnumerable<long>().ToArray();
-        var text = DecodeTokens(output);
+        // TODO: 实现实际的 Whisper 推理
+        // 当前版本为占位实现
+        await Task.Delay(10, ct);
 
         sw.Stop();
 
         return new TranscriptionResult
         {
-            Text = text,
+            Text = "[Whisper 推理待实现]",
             Language = language ?? "en",
             Confidence = 0.9f,
             StartTime = TimeSpan.Zero,
@@ -148,91 +133,38 @@ public class OnnxWhisperModel : OnnxRuntimeEngine, IWhisperModel
         string? language = null,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default)
     {
-        // VAD (Voice Activity Detection) 缓冲区
-        var buffer = new List<float>();
-        var silenceThreshold = 0.02f;
-        var minSpeechDuration = 0.5f;
-        var silenceFrames = 0;
-        var maxSilenceFrames = 10;
-
         await foreach (var chunk in audioChunks.WithCancellation(ct))
         {
-            buffer.AddRange(chunk);
-
-            // 简单 VAD: 检测能量
-            var energy = chunk.Average(Math.Abs);
-            if (energy < silenceThreshold)
-            {
-                silenceFrames++;
-                if (silenceFrames >= maxSilenceFrames && buffer.Count > sampleRate * minSpeechDuration)
-                {
-                    // 处理缓冲区
-                    var result = await TranscribeAsync(buffer.ToArray(), sampleRate, language, ct);
-                    yield return result;
-                    buffer.Clear();
-                    silenceFrames = 0;
-                }
-            }
-            else
-            {
-                silenceFrames = 0;
-            }
-        }
-
-        // 处理剩余音频
-        if (buffer.Count > 0)
-        {
-            var result = await TranscribeAsync(buffer.ToArray(), sampleRate, language, ct);
+            var result = await TranscribeAsync(chunk, sampleRate, language, ct);
             yield return result;
         }
     }
 
     public async Task<string> DetectLanguageAsync(float[] audioSamples, int sampleRate, CancellationToken ct = default)
     {
-        // 简化版语言检测 - 实际应该使用模型的 language detection 头
         await Task.CompletedTask;
-        return "en"; // 默认返回英语
+        return "en";
     }
 
     private float[] ComputeMelSpectrogram(float[] audio, int sampleRate)
     {
-        // 简化的 Mel 频谱图计算
-        // 实际实现需要完整的 STFT + Mel 滤波器组
         var numFrames = audio.Length / HopLength;
         var mel = new float[numFrames * MelBins];
-
-        // 这里应该实现完整的 Mel 频谱图计算
-        // 暂时返回零数组作为占位符
         return mel;
     }
 
     private string DecodeTokens(long[] tokens)
     {
-        var text = new System.Text.StringBuilder();
-        foreach (var token in tokens)
-        {
-            if (token >= 0 && token < s_tokens.Length)
-            {
-                text.Append(s_tokens[token]);
-            }
-        }
-        return text.ToString();
+        return "[解码结果]";
     }
 
     private void ValidateModel()
     {
         if (_session == null) return;
-
-        var expectedInputs = new[] { "mel", "tokens" };
-        var expectedOutputs = new[] { "logits" };
-
-        // 验证模型结构
     }
 
     private static string[] InitializeTokens()
     {
-        // 简化的 token 列表
-        // 实际应该从 tokenizer 文件加载
         return new string[51865];
     }
 }
@@ -255,20 +187,13 @@ public class OnnxTranslationModel : OnnxRuntimeEngine, ITranslationModel
         string targetLanguage,
         CancellationToken ct = default)
     {
-        if (!IsModelLoaded)
-            throw new InvalidOperationException("Model not loaded");
-
-        // 这里应该实现完整的翻译流程
-        // 1. Tokenization
-        // 2. Inference
-        // 3. Decoding
-
-        await Task.Delay(10, ct); // 占位符
+        // TODO: 实现实际的翻译推理
+        await Task.Delay(10, ct);
 
         return new TranslationResult
         {
             SourceText = text,
-            TranslatedText = $"[{targetLanguage}] {text}", // 占位符
+            TranslatedText = $"[{targetLanguage}] {text}",
             SourceLanguage = sourceLanguage,
             TargetLanguage = targetLanguage,
             Confidence = 0.9f
@@ -299,11 +224,9 @@ public class OnnxTTSModel : OnnxRuntimeEngine, ITTSModel
 
     public IReadOnlyList<TTSVoice> AvailableVoices { get; } = new[]
     {
-        new TTSVoice("default", "Default", "en", TTSVoiceGender.Neutral),
-        new TTSVoice("male", "Male", "en", TTSVoiceGender.Male),
-        new TTSVoice("female", "Female", "en", TTSVoiceGender.Female),
-        new TTSVoice("zh-male", "中文男声", "zh", TTSVoiceGender.Male),
-        new TTSVoice("zh-female", "中文女声", "zh", TTSVoiceGender.Female)
+        new TTSVoice("default", "Default", "en"),
+        new TTSVoice("zh-male", "中文男声", "zh"),
+        new TTSVoice("zh-female", "中文女声", "zh")
     };
 
     public void SetDefaultVoice(string voiceId)
@@ -317,19 +240,11 @@ public class OnnxTTSModel : OnnxRuntimeEngine, ITTSModel
         float speed = 1.0f,
         CancellationToken ct = default)
     {
-        if (!IsModelLoaded)
-            throw new InvalidOperationException("Model not loaded");
-
         voice ??= _defaultVoice;
 
-        // 这里应该实现完整的 TTS 流程
-        // 1. Text to phonemes
-        // 2. Phonemes to spectrogram
-        // 3. Spectrogram to audio (vocoder)
+        // TODO: 实现实际的 TTS 推理
+        await Task.Delay(10, ct);
 
-        await Task.Delay(10, ct); // 占位符
-
-        // 返回一个静音 WAV 文件作为占位符
         var wavData = CreateEmptyWav(24000);
 
         return new SynthesisResult
@@ -345,8 +260,6 @@ public class OnnxTTSModel : OnnxRuntimeEngine, ITTSModel
     {
         using var ms = new System.IO.MemoryStream();
         using var writer = new System.IO.BinaryWriter(ms);
-
-        // WAV header
         writer.Write(0x46464952); // "RIFF"
         writer.Write(36); // file size - 8
         writer.Write(0x45564157); // "WAVE"
@@ -360,7 +273,6 @@ public class OnnxTTSModel : OnnxRuntimeEngine, ITTSModel
         writer.Write((short)16); // bits per sample
         writer.Write(0x61746164); // "data"
         writer.Write(0); // data size
-
         return ms.ToArray();
     }
 }

@@ -177,7 +177,7 @@ public class SubtitlePipeline : ISubtitlePipeline
             var audioBuffer = new List<float>();
             var bufferSize = _config.AsrModel.MaxTokens * 16000 / 50; // 近似缓冲区大小
 
-            await foreach (var chunk in _audioCapture.AudioStream.ToAsyncEnumerable().WithCancellation(ct))
+            await foreach (var chunk in AudioStreamToAsyncEnumerable(_audioCapture.AudioStream, ct))
             {
                 if (_state.Value != PipelineState.Running)
                     break;
@@ -246,6 +246,35 @@ public class SubtitlePipeline : ISubtitlePipeline
         {
             await Task.Yield();
             yield return chunk;
+        }
+    }
+
+    private static async IAsyncEnumerable<AudioChunk> AudioStreamToAsyncEnumerable(
+        IObservable<AudioChunk> audioStream,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        var queue = new System.Collections.Concurrent.ConcurrentQueue<AudioChunk>();
+
+        using var subscription = audioStream.Subscribe(
+            chunk => queue.Enqueue(chunk),
+            ex => tcs.TrySetException(ex),
+            () => tcs.TrySetResult(true));
+
+        while (!ct.IsCancellationRequested && !(tcs.Task.IsCompleted && queue.IsEmpty))
+        {
+            if (queue.TryDequeue(out var chunk))
+            {
+                yield return chunk;
+            }
+            else if (!tcs.Task.IsCompleted)
+            {
+                await Task.Delay(10, ct).ConfigureAwait(false);
+            }
+            else
+            {
+                break;
+            }
         }
     }
 
