@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:PrismaAI.UI.ViewModels"
+             x:Class="PrismaAI.UI.Views.SubtitlePage"
+             Title="实时字幕">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <!-- 顶部状态栏 -->
+        <Frame Grid.Row="0" Margin="10" Padding="10" HasShadow="False">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                <BoxView Color="{Binding StatusColor}" WidthRequest="4" HeightRequest="20" VerticalOptions="Center"/>
+                <Label Grid.Column="1" Text="{Binding StatusText}" VerticalOptions="Center" FontAttributes="Bold"/>
+                <Label Grid.Column="2" Text="{Binding SourceLanguage}" FontSize="12" VerticalOptions="Center"/>
+                <Label Grid.Column="3" Text="→" FontSize="12" VerticalOptions="Center"/>
+                <Label Grid.Column="4" Text="{Binding TargetLanguage}" FontSize="12" VerticalOptions="Center"/>
+            </Grid>
+        </Frame>
+
+        <!-- 当前字幕 -->
+        <Frame Grid.Row="1" Margin="10,0" BackgroundColor="{StaticResource Tertiary}" HasShadow="True">
+            <Label Text="{Binding CurrentSubtitle}"
+                   Style="{StaticResource SubtitleTextStyle}"
+                   LineHeight="1.5"/>
+        </Frame>
+
+        <!-- 字幕历史 -->
+        <CollectionView Grid.Row="2"
+                        ItemsSource="{Binding SubtitleHistory}"
+                        Margin="10"
+                        EmptyView="暂无字幕">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="12" HasShadow="False">
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="5">
+                            <Label Grid.Row="0" Text="{Binding Text}" FontSize="16" LineBreakMode="WordWrap"/>
+                            <Label Grid.Row="1"
+                                   Text="{Binding Timestamp, StringFormat='{0:HH:mm:ss}'}"
+                                   FontSize="12"
+                                   TextColor="{StaticResource TextSecondary}"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- 底部控制栏 -->
+        <Frame Grid.Row="3" Margin="10" HasShadow="True">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <Button Command="{Binding StartCommand}"
+                        Text="开始"
+                        IsEnabled="{Binding IsNotRunning}"/>
+                <Button Command="{Binding PauseCommand}"
+                        Text="暂停"
+                        IsEnabled="{Binding IsRunning}"/>
+                <Button Command="{Binding ClearCommand}"
+                        Text="清空"
+                        BackgroundColor="{StaticResource CardBackground}"/>
+            </Grid>
+        </Frame>
+    </Grid>
+
+</ContentPage>

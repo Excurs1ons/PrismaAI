@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:PrismaAI.UI.ViewModels"
+             x:Class="PrismaAI.UI.Views.MainPage"
+             Title="PrismaAI">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- 标题区域 -->
+            <Frame BackgroundColor="{StaticResource Tertiary}" Padding="20">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="PrismaAI" Style="{StaticResource TitleStyle}" TextColor="White"/>
+                    <Label Text="AI 实时字幕 / 翻译系统" Style="{StaticResource SubTitleStyle}" TextColor="#DFD8F7"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 状态卡片 -->
+            <Frame>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15" RowDefinitions="Auto,Auto" RowSpacing="10">
+                    <BoxView Grid.RowSpan="2" Color="{Binding StatusColor}" WidthRequest="5" HeightRequest="50" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="状态" FontSize="12" TextColor="{StaticResource TextSecondary}"/>
+                    <Label Grid.Column="1" Grid.Row="1" Text="{Binding StatusText}" FontSize="18" FontAttributes="Bold"/>
+                </Grid>
+            </Frame>
+
+            <!-- 音频源选择 -->
+            <Frame>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="音频源" FontAttributes="Bold"/>
+                    <Picker ItemsSource="{Binding AudioSourceTypes}"
+                            SelectedItem="{Binding SelectedAudioSourceType}"
+                            Title="选择音频来源"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 语言设置 -->
+            <Frame>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="语言设置" FontAttributes="Bold"/>
+                    <Picker Title="源语言" ItemsSource="{Binding SourceLanguages}" SelectedItem="{Binding SelectedSourceLanguage}"/>
+                    <Picker Title="目标语言" ItemsSource="{Binding TargetLanguages}" SelectedItem="{Binding SelectedTargetLanguage}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 推理模式 -->
+            <Frame>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="推理模式" FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding UseCloudAPI}" OnColor="{StaticResource Primary}"/>
+                        <Label Grid.Column="1" Text="使用云端 API" VerticalOptions="Center"/>
+                        <Label Grid.Column="2" Text="Cloud" FontSize="10" TextColor="{StaticResource Accent}" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding EnableTranslation}" OnColor="{StaticResource Primary}"/>
+                        <Label Grid.Column="1" Text="启用翻译" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding EnableTTS}" OnColor="{StaticResource Primary}"/>
+                        <Label Grid.Column="1" Text="启用语音合成" VerticalOptions="Center"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 控制按钮 -->
+            <Button Command="{Binding StartCommand}" Text="开始识别" IsEnabled="{Binding IsNotRunning}">
+                <Button.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup>
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Success}"/>
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Button.VisualStateGroups>
+            </Button>
+
+            <Button Command="{Binding StopCommand}" Text="停止识别" IsEnabled="{Binding IsRunning}" BackgroundColor="{StaticResource Error}"/>
+
+            <!-- 快捷操作 -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Command="{Binding GoToSubtitleCommand}" Text="字幕页面" Style="{StaticResource SecondaryButton}"/>
+                <Button Command="{Binding GoToSettingsCommand}" Text="设置" Style="{StaticResource SecondaryButton}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Base Styles -->
+    <Style TargetType="Button" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="14,10"/>
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="1" />
+                        </VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="Opacity" Value="0.5" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackground}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextSecondary}"/>
+    </Style>
+
+    <Style TargetType="Editor">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackground}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextSecondary}"/>
+    </Style>
+
+    <Style TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackground}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16"/>
+        <Setter Property="HasShadow" Value="False"/>
+    </Style>
+
+    <Style TargetType="Picker">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBackground}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+
+    <Style TargetType="Switch">
+        <Setter Property="OnColor" Value="{StaticResource Primary}"/>
+    </Style>
+
+    <!-- Subtitle Text Style -->
+    <Style x:Key="SubtitleTextStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="VerticalTextAlignment" Value="Center"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+    </Style>
+
+    <!-- Title Style -->
+    <Style x:Key="TitleStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="28"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="TextColor" Value="{StaticResource Primary}"/>
+    </Style>
+
+    <!-- Subtitle Style -->
+    <Style x:Key="SubTitleStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextColor" Value="{StaticResource TextSecondary}"/>
+    </Style>
+
+</ResourceDictionary>

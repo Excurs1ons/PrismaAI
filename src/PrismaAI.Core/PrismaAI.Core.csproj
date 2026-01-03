@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AI 推理 -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Extensions" Version="0.11.0" />
+    <PackageReference Include="Python.Runtime.NET" Version="3.12.4" />
+
+    <!-- 音频处理 -->
+    <PackageReference Include="NAudio.Core" Version="2.2.1" />
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="NVorbis" Version="1.6.4" />
+
+    <!-- HTTP Client (云端 API) -->
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+
+    <!-- Reactive Extensions -->
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <PackageReference Include="System.Reactive.Linq" Version="6.0.1" />
+
+    <!-- 依赖注入 -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+
+    <!-- 日志 -->
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
+
+    <!-- 工具 -->
+    <PackageReference Include="MemoryPack" Version="1.21.1" />
+    <PackageReference Include="StreamRPC" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

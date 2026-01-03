@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PrismaAI.UI.Views.SettingsPage"
+             Title="设置">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- API 设置 -->
+            <Frame>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="云端 API 设置" FontSize="18" FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding UseCloudAPI}" OnColor="{StaticResource Primary}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="使用云端 API" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Entry Placeholder="API Endpoint"
+                           Text="{Binding CloudEndpoint}"
+                           IsEnabled="{Binding UseCloudAPI}"/>
+
+                    <Entry Placeholder="API Key"
+                           Text="{Binding ApiKey}"
+                           IsPassword="True"
+                           IsEnabled="{Binding UseCloudAPI}"/>
+
+                    <Picker Title="API 提供商"
+                            ItemsSource="{Binding ApiProviders}"
+                            SelectedItem="{Binding SelectedApiProvider}"
+                            IsEnabled="{Binding UseCloudAPI}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 模型设置 -->
+            <Frame>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="本地模型设置" FontSize="18" FontAttributes="Bold"/>
+
+                    <Label Text="ASR 模型" FontAttributes="Bold"/>
+                    <Picker Title="选择 Whisper 模型"
+                            ItemsSource="{Binding WhisperModels}"
+                            SelectedItem="{Binding SelectedWhisperModel}"/>
+
+                    <Label Text="翻译模型" FontAttributes="Bold"/>
+                    <Picker Title="选择翻译模型"
+                            ItemsSource="{Binding TranslationModels}"
+                            SelectedItem="{Binding SelectedTranslationModel}"/>
+
+                    <Label Text="模型路径" FontAttributes="Bold"/>
+                    <Entry Placeholder="模型下载目录"
+                           Text="{Binding ModelPath}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 功能设置 -->
+            <Frame>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="功能设置" FontSize="18" FontAttributes="Bold"/>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding EnableTranslation}" OnColor="{StaticResource Primary}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="启用翻译" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding EnableTTS}" OnColor="{StaticResource Primary}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="启用语音合成" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding EnableWordTimestamps}" OnColor="{StaticResource Primary}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="显示单词级时间戳" VerticalOptions="Center"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Switch IsToggled="{Binding AutoSave}" OnColor="{StaticResource Primary}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="自动保存字幕" VerticalOptions="Center"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 音频设置 -->
+            <Frame>
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="音频设置" FontSize="18" FontAttributes="Bold"/>
+
+                    <Label Text="采样率"/>
+                    <Picker ItemsSource="{Binding SampleRates}"
+                            SelectedItem="{Binding SelectedSampleRate}"/>
+
+                    <Label Text="缓冲区大小 (ms)"/>
+                    <Slider Value="{Binding BufferSize}"
+                            Minimum="100"
+                            Maximum="2000"
+                            Step="100"/>
+                    <Label Text="{Binding BufferSize, StringFormat='当前: {0}ms'}"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{StaticResource TextSecondary}"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- 保存按钮 -->
+            <Button Command="{Binding SaveCommand}" Text="保存设置" HeightRequest="50"/>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
